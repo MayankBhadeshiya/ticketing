@@ -7,7 +7,7 @@ import {
   NotAuthorizedError,
   NotFoundError,
   OrderStatus,
-} from '@sgtickets/common';
+} from '@mbhadeshiya/common';
 import { stripe } from '../stripe';
 import { Order } from '../models/order';
 import { Payment } from '../models/payment';
@@ -17,13 +17,16 @@ import { natsWrapper } from '../nats-wrapper';
 const router = express.Router();
 
 router.post(
-  '/api/payments',
+  "/api/payments",
   requireAuth,
-  [body('token').not().isEmpty(), body('orderId').not().isEmpty()],
+  [
+    body("token").not().isEmpty(),
+    body("orderId").not().isEmpty(),
+    body("userEmail").isEmail(),
+  ],
   validateRequest,
   async (req: Request, res: Response) => {
-    const { token, orderId } = req.body;
-
+    const { token, orderId, userEmail } = req.body;
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -33,11 +36,11 @@ router.post(
       throw new NotAuthorizedError();
     }
     if (order.status === OrderStatus.Cancelled) {
-      throw new BadRequestError('Cannot pay for an cancelled order');
+      throw new BadRequestError("Cannot pay for an cancelled order");
     }
 
     const charge = await stripe.charges.create({
-      currency: 'usd',
+      currency: "usd",
       amount: order.price * 100,
       source: token,
     });
@@ -50,6 +53,7 @@ router.post(
       id: payment.id,
       orderId: payment.orderId,
       stripeId: payment.stripeId,
+      userEmail: userEmail
     });
 
     res.status(201).send({ id: payment.id });

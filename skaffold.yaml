@@ -48,6 +48,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: mayankbhadeshiya/mails
+      context: mails
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     - image: mayankbhadeshiya/payments
       context: payments
       docker:

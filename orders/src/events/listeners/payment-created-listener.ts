@@ -3,10 +3,11 @@ import {
   Listener,
   PaymentCreatedEvent,
   OrderStatus,
-} from '@sgtickets/common';
+} from '@mbhadeshiya/common';
 import { Message } from 'node-nats-streaming';
 import { queueGroupName } from './queue-group-name';
 import { Order } from '../../models/order';
+import { OrderCompletePublisher } from '../publishers/order-complete-publisher';
 
 export class PaymentCreatedListener extends Listener<PaymentCreatedEvent> {
   subject: Subjects.PaymentCreated = Subjects.PaymentCreated;
@@ -23,6 +24,16 @@ export class PaymentCreatedListener extends Listener<PaymentCreatedEvent> {
       status: OrderStatus.Complete,
     });
     await order.save();
+    new OrderCompletePublisher(this.client).publish({
+      id: order.id,
+      userId: order.userId,
+      userEmail: data.userEmail,
+      ticket: {
+        id: order.ticket.id,
+        price: order.ticket.price,
+        title: order.ticket.title
+      },
+    });
 
     msg.ack();
   }

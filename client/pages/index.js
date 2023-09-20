@@ -36,10 +36,17 @@ const LandingPage = ({ currentUser, tickets }) => {
             <th>Link</th>
           </tr>
         </thead>
+
         {tickets.length > 0 ? (
           <tbody>{ticketList}</tbody>
         ) : (
-          <tr><td colSpan={3} className="text-center mt-3">No tickets are avilable</td></tr>
+          <tbody>
+            <tr>
+              <td colSpan={3} className="text-center mt-3">
+                No tickets are avilable
+              </td>
+            </tr>
+          </tbody>
         )}
       </table>
     </div>
