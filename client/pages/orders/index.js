@@ -1,4 +1,7 @@
 const OrderIndex = ({ orders }) => {
+  if(orders.length < 1){
+    return <div>No orders</div>
+  }
   return (
     <ul>
       {orders.map((order) => {

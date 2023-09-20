@@ -1,6 +1,15 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 const LandingPage = ({ currentUser, tickets }) => {
+  if (!currentUser) {
+    return (
+      <div className="text-center">
+        <h1>Welcome to The Ticketing app</h1>
+        <h3>Here You Can Sell Your Ticket for Events</h3>
+      </div>
+    );
+  }
+
   const ticketList = tickets.map((ticket) => {
     return (
       <tr key={ticket.id}>
@@ -18,6 +27,7 @@ const LandingPage = ({ currentUser, tickets }) => {
   return (
     <div>
       <h1>Tickets</h1>
+
       <table className="table">
         <thead>
           <tr>
@@ -26,14 +36,18 @@ const LandingPage = ({ currentUser, tickets }) => {
             <th>Link</th>
           </tr>
         </thead>
-        <tbody>{ticketList}</tbody>
+        {tickets.length > 0 ? (
+          <tbody>{ticketList}</tbody>
+        ) : (
+          <tr><td colSpan={3} className="text-center mt-3">No tickets are avilable</td></tr>
+        )}
       </table>
     </div>
   );
 };
 
 LandingPage.getInitialProps = async (context, client, currentUser) => {
-  const { data } = await client.get('/api/tickets');
+  const { data } = await client.get("/api/tickets");
 
   return { tickets: data };
 };
