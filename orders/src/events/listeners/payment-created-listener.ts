@@ -3,36 +3,41 @@ import {
   Listener,
   PaymentCreatedEvent,
   OrderStatus,
-} from '@mbhadeshiya/common';
-import { Message } from 'node-nats-streaming';
-import { queueGroupName } from './queue-group-name';
-import { Order } from '../../models/order';
-import { OrderCompletePublisher } from '../publishers/order-complete-publisher';
+} from "@mbhadeshiya/common";
+import { Message } from "node-nats-streaming";
+import { queueGroupName } from "./queue-group-name";
+import { Order } from "../../models/order";
+import { OrderCompletePublisher } from "../publishers/order-complete-publisher";
+import { Ticket } from "../../models/ticket";
 
 export class PaymentCreatedListener extends Listener<PaymentCreatedEvent> {
   subject: Subjects.PaymentCreated = Subjects.PaymentCreated;
   queueGroupName = queueGroupName;
 
-  async onMessage(data: PaymentCreatedEvent['data'], msg: Message) {
+  async onMessage(data: PaymentCreatedEvent["data"], msg: Message) {
     const order = await Order.findById(data.orderId);
 
     if (!order) {
-      throw new Error('Order not found');
+      throw new Error("Order not found");
     }
 
     order.set({
       status: OrderStatus.Complete,
     });
     await order.save();
+   
+    const ticket = await Ticket.findById(order.ticket);
+    if (!ticket) {
+      throw new Error("ticket not found");
+    }
+
     new OrderCompletePublisher(this.client).publish({
       id: order.id,
       userId: order.userId,
       userEmail: data.userEmail,
-      ticket: {
-        id: order.ticket.id,
-        price: order.ticket.price,
-        title: order.ticket.title
-      },
+      ticketId: ticket.id,
+      ticketPrice: ticket.price,
+      ticketTitle: ticket.title,
     });
 
     msg.ack();

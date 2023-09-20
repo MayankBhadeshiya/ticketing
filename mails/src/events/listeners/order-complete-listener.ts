@@ -12,7 +12,7 @@ export class OrderCompleteListener extends Listener<OrderCompleteEvent> {
 
   async onMessage(data: OrderCompleteEvent["data"], msg: Message) {
     console.log("Order completed ::::" + data.id);
-    console.log(JSON.stringify(data));
+    console.log(data);
 
     msg.ack();
   }

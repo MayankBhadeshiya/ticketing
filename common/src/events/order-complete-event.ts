@@ -6,10 +6,9 @@ export interface OrderCompleteEvent {
     id: string;
     userId: string;
     userEmail: string;
-    ticket: {
-      id: string;
-      title: string;
-      price: number;
-    };
+    ticketId: string;
+    ticketTitle: string;
+    ticketPrice: number;
+    
   };
 }
